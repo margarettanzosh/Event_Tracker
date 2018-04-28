@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#2196f3">
   <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap:">
-  <title>NEST+m Events (v2)</title>
+  <title>NEST+m Event Tracker</title>
   <link rel="stylesheet" href="css/animate.css">
   <link rel="stylesheet" href="dist/css/framework7.min.css">
   <link rel="stylesheet" href="css/app.css">
@@ -16,8 +16,8 @@
   <link rel="stylesheet" href="css/framework7.welcomescreen.css">
 </head>
 <body>
-  <div id="app">
-    <div class="statusbar"></div>
+  <div id="app" class="color-theme-gray">
+    <div class="statusbar" style="background-color: rgb(123, 31, 162);"></div>
 
     <!-- Left panel with reveal effect-->
     <div class="panel panel-left panel-cover theme-dark">
@@ -67,15 +67,15 @@
 
     <div class="view view-main view-init ios-edges" data-url="/">
       <div class="page" data-page="index">
-        <div class="navbar">
-          <div class="navbar-inner">
+        <div class="navbar" style: "background-color: #7B1FA2;">
+          <div class="navbar-inner" style: "background-color: #7B1FA2;">
             <div class="left">
               <a href="#" class="link icon-only panel-open" data-panel="left">
                 <i class="icon f7-icons ios-only">menu</i>
                 <i class="icon material-icons md-only">menu</i>
               </a>
             </div>
-            <div class="title sliding">NEST+m Events v2</div>
+            <div class="title sliding">NEST+m Event Tracker</div>
             <div class="right">
               <a class="link icon-only searchbar-enable" data-searchbar=".searchbar-components">
                 <i class="icon f7-icons ios-only">search_strong</i>

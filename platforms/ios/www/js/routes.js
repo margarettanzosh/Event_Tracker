@@ -59,6 +59,13 @@ var routes = [
 
   },
 
+  // My Past Events page - Added
+  {
+    path: '/my-past-events/',
+    componentUrl: './pages/my-past-events.html',
+
+  },
+
   {
     path: '/mynotifications/',
     componentUrl: './pages/my-notifications.html',
@@ -86,14 +93,15 @@ var routes = [
 
    // Update Event page - Added
   {
-    // path: '/update-event/:key/',
     path: '/update-event/:key',
     componentUrl: './pages/update-event2.html',
   },
 
-
-
-
+  // Edit/View past deleted events - Added
+  {
+    path: '/past-deleted-events/',
+    componentUrl: './pages/past-deleted-events.html',
+  },
 
 
   // Add/Edit Clubs page - Added

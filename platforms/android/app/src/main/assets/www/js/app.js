@@ -53,6 +53,10 @@ var app = new Framework7({
    input: {
     scrollIntoViewOnFocus: true,
     scrollIntoViewCentered: true,
+  },
+  touch: {
+    tapHold: true,
+    tapHoldDelay: 750
   }
   // vi: {
   //   placementId: 'pltd4o7ibb9rc653x14',

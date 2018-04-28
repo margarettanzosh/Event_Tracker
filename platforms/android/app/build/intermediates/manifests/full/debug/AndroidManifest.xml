@@ -24,6 +24,10 @@
 
     <uses-feature android:name="android.hardware.location.gps" />
 
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.RECORD_VIDEO" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:debuggable="true"
         android:hardwareAccelerated="true"

@@ -11,7 +11,7 @@ function eventAdd() {
 
   // check that date and name entered
   if (!name || !date) {
-    alert("Enter a name and date!");
+    app.dialog.alert("Enter a name and date!", "NEST+m Event Tracker");
   }
   else {
     // add to DB here
@@ -28,8 +28,22 @@ function eventAdd() {
 };
 
 function eventRemove(key) {
+  // eventsRef.child(key).remove();
+  eventsRef.child(key).update({
+    deleted: true
+  })
+
+  db.ref('events/' + key + '/notifications/').push({
+    text: 'This event was deleted.',
+    datenow: Date.now()
+  });
+
+  console.log("Event Flagged as Deleted!");
+}
+
+function eventReallyRemove(key) {
   eventsRef.child(key).remove();
-  console.log("Event Deleted!");
+  console.log("Event Really Deleted!");
 }
 
 // adds existing values to form
@@ -64,7 +78,7 @@ function saveToMyEvents(uid, eventkey) {
       myEvents.push(eventData[key].eventkey)
     }
     if (myEvents.includes(eventkey)) {
-        app.dialog.alert("You've already saved this event!")
+        app.dialog.alert("You've already saved this event!", "NEST+m Event Tracker")
     }
     else {
       db.ref('myevents/' + uid).push({
@@ -72,7 +86,7 @@ function saveToMyEvents(uid, eventkey) {
         dateadded: Date.now()
       })
       getMyEvents();
-      app.dialog.alert('Event Added');
+      app.dialog.alert('Event Added', "NEST+m Event Tracker");
     }
   })
 }
@@ -81,37 +95,9 @@ function deleteFromMyEvents(uid, key) {
   let myRef = db.ref('myevents/' + uid);
   myRef.child(key).remove();
   getMyEvents();
-  app.dialog.alert('Event Deleted!');
+  app.dialog.alert('Event Deleted!', "NEST+m Event Tracker");
   console.log("Event Deleted!");
 }
-
-
-  // See https://github.com/daneden/animate.css/issues/644
-//   var animationEnd = (function(el) {
-//   var animations = {
-//     animation: 'animationend',
-//     OAnimation: 'oAnimationEnd',
-//     MozAnimation: 'mozAnimationEnd',
-//     WebkitAnimation: 'webkitAnimationEnd',
-//   };
-//
-//   for (var t in animations) {
-//     if (el.style[t] !== undefined) {
-//       return animations[t];
-//     }
-//   }
-// })(document.createElement('div'));
-
-//   $$('#card1').on(animationEnd, function() {
-//     console.log("animation over");
-//     // $$('#card1').html('');
-//     // $$('#card2').addClass('animated slideInUp');
-// });
-// $$('card2').addClass('animated slideInUp');
-// $$('#card1').html('');
-// $$('#card2').addClass('animated slideInUp');
-// }
-
 
 // swipeout for events or delete event
 function refreshEventEdit(elist) {
@@ -140,6 +126,14 @@ function refreshEventEdit(elist) {
     elis += '</ul>'
     clublis += elis + '</div></div>'
   }
+
+  // add past events link
+  clublis += '<div class="block-title" style="text-transform: uppercase;">More</div>' +
+             '<div class="list components-list-2">' +
+             '<ul><li><a class="item-content item-link" href="/past-deleted-events/">' +
+             '<div class="item-inner">' +
+             '<b>Past and Deleted Events</b></div>' +
+             '</a></li></ul></div>';
   // elis += '</ul>'
   // console.log(elis);
   $$('#eventEditList').html(clublis);
@@ -160,7 +154,7 @@ function refreshUI(list) {
       var comma = "";
       if (list[month % 12][i].room)
       {
-        roomInfo = "Room " + list[month % 12][i].room;
+        roomInfo = "Location: " + list[month % 12][i].room;
       }
       if (list[month % 12][i].email)
       {
@@ -170,31 +164,17 @@ function refreshUI(list) {
       {
         comma = ", ";
       }
-      // console.log(longDateStr);
-      // lis += '<li class="accordion-item"><a href="#" class="item-content item-link">' +
-      //   ' <div class="item-inner">' +
-      //   '   <div class="item-title"><small>' + longDateStr + '</small></br> <b><span class="title">' + list[month % 12][i].name + '</span> </b></div>' +
-      //   ' </div></a>' +
-      //   '<div class="accordion-item-content">' +
-      //   '  <div class="block">' +
-      //   '   <p style="margin: 1px 0;">' + list[month % 12][i].description + '</p>' +
-      //   '   <p style="margin: 1px 0;">' + list[month % 12][i].club + '</p>' +
-      //   '   <p style="margin: 1px 0;">' + list[month % 12][i].time + comma + roomInfo + '</p>' +
-      //   '   <p style="margin: 1px 0;">' + emailInfo + '<a style="color: #7B1FA2;" class="external" target="_system" href="mailto:' + list[month % 12][i].email + '">' + list[month % 12][i].email + '</a></p>'
-      //   ' </div>' +
-      //   '</div>' +
-      //   '</li>';
 
         // add myEvents
         var stme = "saveToMyEvents('" + app.user.uid + "','" + list[month % 12][i].key + "')"
 
-        lis += '<li class="accordion-item swipeout"><a href="#" class="item-content item-link">' +
+        lis += '<li class="accordion-item swipeout swipe-my-events"><a href="#" class="item-content item-link">' +
           ' <div class="item-inner swipeout-content">' +
           '   <div class="item-title"><small>' + longDateStr + '</small></br> <b><span class="title">' + list[month % 12][i].name + '</span> </b></div>' +
           ' </div></a>' +
 
           '<div class="accordion-item-content">' +
-          '  <div class="block">' +
+          '  <div class="block event-detail swipeout-content">' +
           '   <p style="margin: 1px 0;">' + list[month % 12][i].description + '</p>' +
           '   <p style="margin: 1px 0;">' + list[month % 12][i].club + '</p>' +
           '   <p style="margin: 1px 0;">' + list[month % 12][i].time + comma + roomInfo + '</p>' +
@@ -215,6 +195,7 @@ function refreshUI(list) {
 
   // console.log(lis);
   $$('#eventsID').html(cbt);
+
 
   // create searchbar
   var searchbar = app.searchbar.create({
@@ -237,28 +218,46 @@ function getEventsByKey() {
   eventsRef.on("value", function(snapshot) {
     var data = snapshot.val();
     var elist = {};
+    var pastDelElist = {};
     for (var key in data) {
       if (data.hasOwnProperty(key)) {
         name = data[key].name ? data[key].name : '';
         date = data[key].date;
         club = data[key].club;
-        // if (name.trim().length > 0) {
+        // debugger;
+        eventInfo = {
+          key: key,
+          name: name,
+          date: date,
+          club: club,
+          description: data[key].description,
+          room: data[key].room,
+          email: data[key].email,
+          time: data[key].time
+        }
+
+        // if date is past or event was deleted add to pastDeleteElist
+        if (date < todayDate() || (typeof data[key].deleted != 'undefined' && data[key].deleted)) {
+          if (typeof pastDelElist[club] === 'undefined') {
+            pastDelElist[club] = [];
+          }
+          pastDelElist[club].push(eventInfo);
+        }
+        else {
+
+        // if (typeof data[key].deleted === 'undefined' && !data[key].deleted) { // delete?
         if (typeof elist[club] === 'undefined') {
           elist[club] = [];
         }
-          elist[club].push({
-            key: key,
-            name: name,
-            date: date,
-            club: club,
-            description: data[key].description,
-            room: data[key].room,
-            email: data[key].email,
-            time: data[key].time
-          })
+          elist[club].push(eventInfo);
+        // } // delete?
+        }
       }
     }
     refreshEventEdit(elist);
+    app.user.pastDelEvents = pastDelElist;
+    console.log(app.user.pastDelEvents);
+    // debugger;
   })
 }
 
@@ -290,6 +289,7 @@ function getEventsByMonth() {
     var data = snapshot.val();
     date = data["date"];
     var month = eventMonth(date) - 1;
+    if (typeof data["deleted"] === 'undefined' || !data["deleted"]) {
     if (date >= todayDate() && month >= 0 && month <= 11) {
       list[month].push({
         key: snapshot.key,
@@ -302,43 +302,43 @@ function getEventsByMonth() {
         time: data["time"]
       })
     }
-
-
-    function todayDate() {
-      var today = new Date();
-      var dd = today.getDate();
-      var mm = today.getMonth() + 1; //January is 0!
-
-      var yyyy = today.getFullYear();
-      if (dd < 10) {
-        dd = '0' + dd;
-      }
-      if (mm < 10) {
-        mm = '0' + mm;
-      }
-      var todayDate = yyyy + '-' + mm + '-' + dd;
-      return todayDate;
-    }
-
-    function eventMonth(date) {
-      month = date.substring(5, 7);
-      return month;
-    }
-
-    function eventDay(date) {
-      day = date.substring(8, 9);
-      return day;
-    }
-
-    function eventYear(date) {
-      year = date.substring(0, 4);
-      return year;
     }
 
     // refresh the UI
     refreshUI(list);
   });
+}
 
+// date functions
+function todayDate() {
+  var today = new Date();
+  var dd = today.getDate();
+  var mm = today.getMonth() + 1; //January is 0!
+
+  var yyyy = today.getFullYear();
+  if (dd < 10) {
+    dd = '0' + dd;
+  }
+  if (mm < 10) {
+    mm = '0' + mm;
+  }
+  var todayDate = yyyy + '-' + mm + '-' + dd;
+  return todayDate;
+}
+
+function eventMonth(date) {
+  month = date.substring(5, 7);
+  return month;
+}
+
+function eventDay(date) {
+  day = date.substring(8, 9);
+  return day;
+}
+
+function eventYear(date) {
+  year = date.substring(0, 4);
+  return year;
 }
 
 // organize events page by club
@@ -347,18 +347,6 @@ function getEventsByClub() {
   initApp();
 
   var clubList = {};
-
-  // clubsRef.on("value", function(club_snapshot) {
-  //   var data = club_snapshot.val();
-  //   for (var key in data) {
-  //     clubList[data[key].club_name] = {
-  //       // club_name: data[key].club_name,
-  //       club_events: []
-  //     }
-  //   }
-
-  // get clubs
-  // console.log(clubList)
 
   eventsRef.orderByChild("date").on("child_added", function(snapshot) {
     var data = snapshot.val();
@@ -382,38 +370,6 @@ function getEventsByClub() {
         room: data["room"],
         time: data["time"]
       })
-    }
-
-
-    function todayDate() {
-      var today = new Date();
-      var dd = today.getDate();
-      var mm = today.getMonth() + 1; //January is 0!
-
-      var yyyy = today.getFullYear();
-      if (dd < 10) {
-        dd = '0' + dd;
-      }
-      if (mm < 10) {
-        mm = '0' + mm;
-      }
-      var todayDate = yyyy + '-' + mm + '-' + dd;
-      return todayDate;
-    }
-
-    function eventMonth(date) {
-      month = date.substring(5, 7);
-      return month;
-    }
-
-    function eventDay(date) {
-      day = date.substring(8, 9);
-      return day;
-    }
-
-    function eventYear(date) {
-      year = date.substring(0, 4);
-      return year;
     }
 
     // refresh the UI
@@ -460,16 +416,18 @@ function refreshUIByClub(clubList) {
         ' </div></a>' +
 
         '<div class="accordion-item-content">' +
-        '  <div class="block">' +
+        '  <div class="block swipeout-content">' +
         '   <p style="margin: 1px 0;">' + events[i].description + '</p>' +
         '   <p style="margin: 1px 0;">' + events[i].club + '</p>' +
         '   <p style="margin: 1px 0;">' + events[i].time + comma + roomInfo + '</p>' +
         '   <p style="margin: 1px 0;">' + emailInfo + '<a style="color: #7B1FA2;" class="external" target="_system" href="mailto:' + events[i].email + '">' + events[i].email + '</a></p>' +
         ' </div>' +
         '</div>' +
+
+
         '<div class="swipeout-actions-right">' +
         '   <a class="color-blue" href="#" onclick=' + stme + '>Add to My Events</a>' +
-        '</div>'
+        '</div>' +
         '</li>';
 
     };

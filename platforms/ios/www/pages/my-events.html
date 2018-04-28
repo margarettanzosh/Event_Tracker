@@ -58,32 +58,15 @@
     on: {
       pageInit: function () {
 
-
-
-
-
         // get events for this user
-        // debugger;
         var myEvents = app.user.events[0];
         var myEventKeys = app.user.events[1];
 
-        // var myEvents = [];
-        // var myEventKeys = [];
-        // var eventData;
-        // myEventsRef.orderByKey().equalTo(app.user.uid).limitToFirst(1).on("child_added", function(snapshot) {
-        //   eventData = snapshot.val();
-        //   // debugger;
-        //   for (var key in eventData) {
-        //     console.log('Event Key:' + eventData[key].eventkey);
-        //     myEvents.push(eventData[key].eventkey);
-        //     myEventKeys.push(key);
-        //   }
-
-          // debugger;
           //  this will get fired on inital load as well as when ever there is a change in the data
           eventsRef.on("value", function(snapshot) {
             var data = snapshot.val();
             var elist = {};
+            var pastElist = {};
             // debugger;
             for (var key in data) {
               // debugger;
@@ -93,21 +76,40 @@
                 name = data[key].name ? data[key].name : '';
                 date = data[key].date;
                 club = data[key].club;
-                // if (name.trim().length > 0) {
-                if (typeof elist[club] === 'undefined') {
-                  elist[club] = [];
+                description = data[key].description;
+
+                if (typeof data[key].deleted != 'undefined' && !data["deleted"]) {
+                  name += '<b class="text-color-red">(Deleted)</b>'
                 }
-                  elist[club].push({
-                    myeventkey: myEventKeys[index],
-                    key: key,
-                    name: name,
-                    date: date,
-                    club: club,
-                    description: data[key].description,
-                    room: data[key].room,
-                    email: data[key].email,
-                    time: data[key].time
-                  })
+                console.log(name);
+                // debugger;
+
+                var eventInfo = {
+                  myeventkey: myEventKeys[index],
+                  key: key,
+                  name: name,
+                  date: date,
+                  club: club,
+                  description: description,
+                  room: data[key].room,
+                  email: data[key].email,
+                  time: data[key].time
+                }
+
+                // if date is past add to pastElist
+                if (date < todayDate()) {
+                  if (typeof pastElist[club] === 'undefined') {
+                    pastElist[club] = [];
+                  }
+                  pastElist[club].push(eventInfo);
+                }
+
+                else {
+                  if (typeof elist[club] === 'undefined') {
+                    elist[club] = [];
+                  }
+                    elist[club].push(eventInfo);
+                }
               }
             }
             console.log(elist);
@@ -116,7 +118,7 @@
             for (club in elist) {
               clublis +=  '<div class="block-title searchbar-found" style="text-transform: uppercase;">' + club + '</div>' +
                       '<div class="list components-list-2 searchbar-found">';
-              elis = '<ul>'
+              var elis = '<ul>'
               var events = elist[club];
 
               for (var i = 0; i < events.length; i++) {
@@ -130,7 +132,7 @@
                   ' </a>' +
                   ' </div>' +
                   '<div class="swipeout-actions-right">' +
-                  ' <a href="#" data-confirm="Are you sure you want to delete this item?" class="swipeout-delete" onclick=deleteFromMyEvents("' + app.user.uid + '","'+ events[i].myeventkey+ '")>Delete</a>' +
+                  ' <a href="#" class="swipeout-delete" onclick=deleteFromMyEvents("' + app.user.uid + '","'+ events[i].myeventkey+ '")>Delete</a>' +
                   '</div>' +
                   '</li>';
               };
@@ -138,11 +140,17 @@
               clublis += elis + '</div></div>'
             }
 
-            // console.log(clublis);
-
+            // add past events link
+            clublis += '<div class="block-title" style="text-transform: uppercase;">More</div>' +
+                       '<div class="list components-list-2">' +
+                       '<ul><li><a class="item-content item-link" href="/my-past-events/">' +
+                       '<div class="item-inner">' +
+                       '<b>Past Events</b></div>' +
+                       '</a></li></ul></div>';
 
             // debugger;
             $$('#myEventList').html(clublis);
+            app.user.pastEvents = pastElist;
 
             // create new searchbar
             var searchbar = app.searchbar.create({

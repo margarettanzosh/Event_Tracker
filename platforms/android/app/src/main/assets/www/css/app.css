@@ -541,3 +541,15 @@ i, .icon, .icon-back {
 .md .statusbar {
     background-color: #7B1FA2;
 }
+
+div.statusbar {
+  background-color: #7B1FA2;
+}
+
+.purple {
+  background-color: #7B1FA2;
+}
+
+.md .color-theme-gray .navbar {
+  background-color: #7B1FA2;
+}
